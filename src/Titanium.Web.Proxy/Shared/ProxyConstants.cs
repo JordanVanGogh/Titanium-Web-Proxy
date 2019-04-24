@@ -10,6 +10,8 @@ namespace Titanium.Web.Proxy.Shared
     /// </summary>
     internal class ProxyConstants
     {
+        internal const int SshPort = 22;
+
         internal static readonly char DotSplit = '.';
 
         internal static readonly char[] SpaceSplit = { ' ' };

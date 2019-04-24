@@ -1,4 +1,4 @@
-## Titanium Web Proxy
+## Titanium Web Proxy (unofficial fork)
 
 A lightweight HTTP(S) proxy server written in C#.
 
@@ -15,6 +15,7 @@ Kindly report only issues/bugs here. For programming help or questions use [Stac
 * View/modify/redirect/block requests and responses
 * Supports mutual SSL authentication, proxy authentication & automatic upstream proxy detection
 * Kerberos/NTLM authentication over HTTP protocols for windows domain
+* Better support for SSH connections
 
 ### Installation
 Install by [nuget](https://www.nuget.org/packages/Titanium.Web.Proxy)

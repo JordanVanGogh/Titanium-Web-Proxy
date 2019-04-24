@@ -121,8 +121,13 @@ namespace Titanium.Web.Proxy
 
                     await clientStreamWriter.WriteResponseAsync(response, cancellationToken: cancellationToken);
 
-                    var clientHelloInfo = await SslTools.PeekClientHello(clientStream, BufferPool, cancellationToken);
-
+                    ClientHelloInfo clientHelloInfo = null;
+                    // We want to skip peeking the client hello for SSH connections because it might not come at this point:
+                    if (!SshHelper.IsSshConnectRequest(connectRequest))
+                    {
+                        clientHelloInfo = await SslTools.PeekClientHello(clientStream, BufferPool, cancellationToken);
+                    }
+                    
                     bool isClientHello = clientHelloInfo != null;
                     if (isClientHello)
                     {
