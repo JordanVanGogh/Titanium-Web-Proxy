@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Titanium.Web.Proxy.SshFixFork</id>
-    <version>$version$</version>
-    <title>Titanium Web Proxy Fork with SSH handler fix</title>
+    <id>Titanium.Web.Proxy.Fork-WithSshFix</id>
+    <version>0.1.0</version>
+    <title>Fork of Titanium Web Proxy, with SSH connection fix</title>
     <authors>Titanium Web Proxy GitHub Contributors</authors>
     <owners>justcoding121</owners>
-    <licenseUrl>https://github.com/JordanVanGogh/Titanium-Web-Proxy/blob/master/LICENSE</licenseUrl>
+    <license type="expression">MIT</license>
     <projectUrl>https://github.com/JordanVanGogh/Titanium-Web-Proxy</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Titanium is a light weight web proxy. This unofficial fork contains a fix for handling SSH connections, so that it can be used to proxy SSH.NET connections.</description>
+    <description>Titanium is a light weight web proxy. This unofficial fork contains a fix for better handling SSH connections, so that it can be used to proxy SSH.NET connections.</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright &#x00A9; Titanium. All rights reserved.</copyright>
     <tags></tags>
@@ -29,7 +29,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\$configuration$\net45\Titanium.Web.Proxy.dll" target="lib\net45"  />
-    <file src="bin\$configuration$\netstandard2.0\Titanium.Web.Proxy.dll" target="lib\netstandard2.0"  />
+    <file src="bin\Release\net45\Titanium.Web.Proxy.dll" target="lib\net45"  />
+    <file src="bin\Release\netstandard2.0\Titanium.Web.Proxy.dll" target="lib\netstandard2.0"  />
   </files>
 </package>
