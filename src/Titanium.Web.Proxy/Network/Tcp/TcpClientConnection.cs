@@ -15,20 +15,26 @@ namespace Titanium.Web.Proxy.Network.Tcp
     /// </summary>
     internal class TcpClientConnection : IDisposable
     {
-        internal TcpClientConnection(ProxyServer proxyServer, TcpClient tcpClient)
+        internal TcpClientConnection(ProxyServer proxyServer, TcpClient tcpClient, int readTimeout, int writeTimeout)
         {
             this.tcpClient = tcpClient;
             this.proxyServer = proxyServer;
-            this.proxyServer.UpdateClientConnectionCount(true);
+            this.proxyServer.UpdateClientConnectionCount(true, Id, LocalEndPoint, RemoteEndPoint);
+            this.ReadTimeout = readTimeout;
+            this.WriteTimeout = writeTimeout;
         }
 
         private ProxyServer proxyServer { get; }
 
         public Guid Id { get; } = Guid.NewGuid();
 
-        public EndPoint LocalEndPoint => tcpClient.Client.LocalEndPoint;
+        public int ReadTimeout { get; }
 
-        public EndPoint RemoteEndPoint => tcpClient.Client.RemoteEndPoint;
+        public int WriteTimeout { get; }
+
+        public EndPoint LocalEndPoint => tcpClient?.Client?.LocalEndPoint;
+
+        public EndPoint RemoteEndPoint => tcpClient?.Client?.RemoteEndPoint;
 
         internal SslApplicationProtocol NegotiatedApplicationProtocol { get; set; }
 
@@ -36,7 +42,10 @@ namespace Titanium.Web.Proxy.Network.Tcp
 
         public Stream GetStream()
         {
-            return tcpClient.GetStream();
+            var ns = tcpClient.GetStream();
+            ns.ReadTimeout = this.ReadTimeout;
+            ns.WriteTimeout = this.WriteTimeout;
+            return ns;
         }
 
         /// <summary>
@@ -44,13 +53,46 @@ namespace Titanium.Web.Proxy.Network.Tcp
         /// </summary>
         public void Dispose()
         {
+            Guid id = Guid.Empty;
+            try
+            {
+                id = Id;
+            }
+            catch { }
+
+            EndPoint localEndPoint = null;
+            try
+            {
+                localEndPoint = LocalEndPoint;
+            }
+            catch { }
+
+            EndPoint remoteEndPoint = null;
+            try
+            {
+                remoteEndPoint = RemoteEndPoint;
+            }
+            catch { }
+
             Task.Run(async () =>
             {
                 //delay calling tcp connection close()
                 //so that client have enough time to call close first.
                 //This way we can push tcp Time_Wait to client side when possible.
-                await Task.Delay(1000);
-                proxyServer.UpdateClientConnectionCount(false);
+                try
+                {
+                    await Task.Delay(1000);
+                }
+                catch { }
+
+                try
+                {
+                    proxyServer.UpdateClientConnectionCount(false, id, localEndPoint, remoteEndPoint);
+                }
+                catch
+                {
+                    proxyServer.UpdateClientConnectionCount(false, id);
+                }
                 tcpClient.CloseSocket();
             });
            

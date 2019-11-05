@@ -31,7 +31,7 @@ namespace Titanium.Web.Proxy
         /// <returns>The task.</returns>
         private async Task handleClient(ExplicitProxyEndPoint endPoint, TcpClientConnection clientConnection)
         {
-            var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(this.cancellationTokenSource.Token);
             var cancellationToken = cancellationTokenSource.Token;
 
             var clientStream = new CustomBufferedStream(clientConnection.GetStream(), BufferPool, BufferSize);

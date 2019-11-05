@@ -33,7 +33,7 @@ namespace Titanium.Web.Proxy
                 var header = httpHeaders.GetFirstHeader(KnownHeaders.ProxyAuthorization);
                 if (header == null)
                 {
-                    session.HttpClient.Response = createAuthentication407Response("Proxy Authentication Required");
+                    session.HttpClient.Response = createAuthentication407Response("Proxy Authentication Required", session: session);
                     return false;
                 }
 
@@ -112,7 +112,7 @@ namespace Titanium.Web.Proxy
         /// </summary>
         /// <param name="description">Response description.</param>
         /// <returns></returns>
-        private Response createAuthentication407Response(string description, string continuation = null)
+        private Response createAuthentication407Response(string description, string continuation = null, SessionEventArgsBase session = null)
         {
             var response = new Response
             {
@@ -128,7 +128,7 @@ namespace Titanium.Web.Proxy
 
             if (ProxyBasicAuthenticateFunc != null)
             {
-                response.Headers.AddHeader(KnownHeaders.ProxyAuthenticate, $"Basic realm=\"{ProxyAuthenticationRealm}\"");
+                response.Headers.AddHeader(KnownHeaders.ProxyAuthenticate, $"Basic realm=\"{(session != null ? session.Challenge : ProxyAuthenticationRealm)}\"");
             }
 
             if (ProxySchemeAuthenticateFunc != null)

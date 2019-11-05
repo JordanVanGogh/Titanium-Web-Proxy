@@ -56,8 +56,12 @@ namespace Titanium.Web.Proxy
         ///     Upstream proxy manager.
         /// </summary>
         private WinHttpWebProxyFinder systemProxyResolver;
-
         
+        /// <summary>
+        ///  Main cancellation token source.
+        /// </summary>
+        private CancellationTokenSource cancellationTokenSource;
+
         /// <inheritdoc />
         /// <summary>
         ///     Initializes a new instance of ProxyServer class with provided parameters.
@@ -311,7 +315,7 @@ namespace Titanium.Web.Proxy
         /// <summary>
         ///     Event occurs when client connection count changed.
         /// </summary>
-        public event EventHandler ClientConnectionCountChanged;
+        public event EventHandler<ClientConnectionCountChangedEventArgs> ClientConnectionCountChanged;
 
         /// <summary>
         ///     Event occurs when server connection count changed.
@@ -550,6 +554,8 @@ namespace Titanium.Web.Proxy
                 throw new Exception("Proxy is already running.");
             }
 
+            cancellationTokenSource = new CancellationTokenSource();
+
             setThreadPoolMinThread(ThreadPoolWorkerThread);
 
             if (ProxyEndPoints.OfType<ExplicitProxyEndPoint>().Any(x => x.GenericCertificate == null))
@@ -609,6 +615,8 @@ namespace Titanium.Web.Proxy
             {
                 throw new Exception("Proxy is not running.");
             }
+
+            cancellationTokenSource.Cancel();
 
             if (RunTime.IsWindows && !RunTime.IsUwpOnWindows)
             {
@@ -770,7 +778,7 @@ namespace Titanium.Web.Proxy
 
             await InvokeConnectionCreateEvent(tcpClient, true);
 
-            using (var clientConnection = new TcpClientConnection(this, tcpClient))
+            using (var clientConnection = new TcpClientConnection(this, tcpClient, tcpClient.ReceiveTimeout, tcpClient.SendTimeout))
             {
                 if (endPoint is TransparentProxyEndPoint tep)
                 {
@@ -813,18 +821,25 @@ namespace Titanium.Web.Proxy
         ///     Update client connection count.
         /// </summary>
         /// <param name="increment">Should we increment/decrement?</param>
-        internal void UpdateClientConnectionCount(bool increment)
+        internal void UpdateClientConnectionCount(bool increment, Guid connectionId = default(Guid), EndPoint localEndPoint = null, EndPoint remoteEndPoint = null)
         {
+            int updatedCount;
             if (increment)
             {
-                Interlocked.Increment(ref clientConnectionCount);
+                updatedCount = Interlocked.Increment(ref clientConnectionCount);
             }
             else
             {
-                Interlocked.Decrement(ref clientConnectionCount);
+                updatedCount = Interlocked.Decrement(ref clientConnectionCount);
             }
 
-            ClientConnectionCountChanged?.Invoke(this, EventArgs.Empty);
+            ClientConnectionCountChanged?.Invoke(this, new ClientConnectionCountChangedEventArgs
+            {
+                ConnectionId = connectionId,
+                UpdatedCount = updatedCount,
+                LocalEndPoint = localEndPoint,
+                RemoteEndPoint = remoteEndPoint
+            });
         }
 
         /// <summary>

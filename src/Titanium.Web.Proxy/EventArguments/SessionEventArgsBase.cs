@@ -43,6 +43,7 @@ namespace Titanium.Web.Proxy.EventArguments
             BufferPool = server.BufferPool;
             ExceptionFunc = server.ExceptionFunc;
             TimeLine["Session Created"] = DateTime.Now;
+            Challenge = Guid.NewGuid().ToString("N");
         }
 
         protected SessionEventArgsBase(ProxyServer server, ProxyEndPoint endPoint,
@@ -74,6 +75,8 @@ namespace Titanium.Web.Proxy.EventArguments
 
                 throw new PlatformNotSupportedException();
             });
+
+            Challenge = Guid.NewGuid().ToString("N");
         }
 
         /// <summary>
@@ -184,5 +187,10 @@ namespace Titanium.Web.Proxy.EventArguments
         {
             CancellationTokenSource.Cancel();
         }
+        
+        /// <summary>
+        ///     The challenge of the session.
+        /// </summary>
+        public string Challenge { get; set; }
     }
 }
